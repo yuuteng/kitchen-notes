@@ -74,12 +74,6 @@ function diffOf(method: Method, prev: Shot | undefined, cur: Shot): string[] {
   return out;
 }
 
-// Local calendar date as YYYY-MM-DD (toISOString would give the UTC date).
-function today() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-
 export default function Coffee() {
   const [shots, setShots] = useState<Shot[] | null>(null);
   const [loadError, setLoadError] = useState('');
@@ -87,7 +81,6 @@ export default function Coffee() {
   const [values, setValues] = useState<Values>(() => defaults('espresso'));
   const [taste, setTaste] = useState(0);
   const [bean, setBean] = useState('');
-  const [roast, setRoast] = useState(today);
   const [note, setNote] = useState('');
   const [onlyBean, setOnlyBean] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -117,7 +110,6 @@ export default function Coffee() {
     if (last) for (const f of FIELDS[m]) if (last[f.key] !== null) v[f.key] = last[f.key] as number;
     setValues(v);
     setBean(last?.bean ?? '');
-    setRoast(last?.roast_date ?? today());
     setTaste(0);
     setNote('');
   }, []);
@@ -151,7 +143,6 @@ export default function Coffee() {
   const filteredByBean = charted !== ofMethod;
 
   const ratio = values.dose > 0 ? values.yield_g / values.dose : 0;
-  const roastDay = roast ? Math.floor((Date.now() - new Date(`${roast}T00:00:00`).getTime()) / 86400000) : null;
 
   const step = (f: Field, dir: 1 | -1) =>
     setValues((v) => ({ ...v, [f.key]: Math.max(f.min, Math.min(f.max, Math.round((v[f.key] + dir * f.step) * 10) / 10)) }));
@@ -164,7 +155,7 @@ export default function Coffee() {
     const input: ShotInput = {
       method,
       bean: bean.trim(),
-      roast_date: roast || null,
+      roast_date: null,
       grind: pick('grind'),
       dose: pick('dose'),
       time_s: pick('time_s'),
@@ -241,7 +232,6 @@ export default function Coffee() {
     for (const f of FIELDS[s.method]) if (s[f.key] !== null) v[f.key] = s[f.key] as number;
     setValues(v);
     setBean(s.bean);
-    setRoast(s.roast_date ?? '');
     setTaste(s.taste ?? 0);
     setNote(s.note ?? '');
     setEditingId(s.id);
@@ -263,7 +253,6 @@ export default function Coffee() {
         <div>
           <div className="text-[13px] font-semibold text-sub">
             {bean.trim() || '未填写咖啡豆'}
-            {roastDay !== null && roastDay >= 0 && ` · 烘焙后第 ${roastDay} 天`}
           </div>
           <h1 className="text-[30px] font-extrabold lg:text-4xl">{method === 'espresso' ? '意式浓缩' : '手冲'}</h1>
         </div>
@@ -336,8 +325,7 @@ export default function Coffee() {
             </button>
           )}
 
-          <div className="grid grid-cols-2 gap-2">
-            <div className="flex min-w-0 flex-col gap-1.5">
+          <div className="flex min-w-0 flex-col gap-1.5">
               <label htmlFor="bean" className="text-xs font-semibold text-sub">
                 咖啡豆
               </label>
@@ -347,13 +335,6 @@ export default function Coffee() {
                   <option key={b} value={b} />
                 ))}
               </datalist>
-            </div>
-            <div className="flex min-w-0 flex-col gap-1.5">
-              <label htmlFor="roast" className="text-xs font-semibold text-sub">
-                烘焙日期
-              </label>
-              <input id="roast" type="date" className="field min-h-[50px] appearance-none text-left [color-scheme:dark]" value={roast} onChange={(e) => setRoast(e.target.value)} />
-            </div>
           </div>
 
           <div className="grid grid-cols-3 gap-2.5 lg:grid-cols-2 lg:gap-3">

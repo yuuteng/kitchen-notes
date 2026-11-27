@@ -169,8 +169,8 @@ async function extract(env: Env, user: string, body: any) {
 // ---------- CSV ----------
 
 function toCsv(rows: any[]): string {
-  const head = ['时间', '方式', '咖啡豆', '烘焙日期', '研磨度', '粉量g', '时间s', '液量g', '压力bar', '水温C', '评分', '口感(-2很酸~2很苦)', '备注'];
-  const cols = ['created_at', 'method', 'bean', 'roast_date', 'grind', 'dose', 'time_s', 'yield_g', 'pressure', 'temp', 'score', 'taste', 'note'];
+  const head = ['时间', '方式', '咖啡豆', '研磨度', '粉量g', '时间s', '液量g', '压力bar', '水温C', '评分', '口感(-2很酸~2很苦)', '备注'];
+  const cols = ['created_at', 'method', 'bean', 'grind', 'dose', 'time_s', 'yield_g', 'pressure', 'temp', 'score', 'taste', 'note'];
   const cell = (v: unknown) => {
     const s = v === null || v === undefined ? '' : String(v);
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
