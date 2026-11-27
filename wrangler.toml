@@ -1,0 +1,16 @@
+name = "kitchen-notes"
+compatibility_date = "2026-11-01"
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "kitchen-notes"
+database_id = "7c612eff-fcf3-42f2-bce7-127d5c9ee07b"
+migrations_dir = "migrations"
+
+[[r2_buckets]]
+binding = "PHOTOS"
+bucket_name = "kitchen-notes-photos"
+
+[ai]
+binding = "AI"

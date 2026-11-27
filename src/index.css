@@ -1,0 +1,152 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-bg: #0b0a10;
+  --color-card: #201d28;
+  --color-accent: #ff8a65;
+  --color-accent-ink: #170b12;
+  --color-ink: #f6f3fa;
+  --color-sub: #d2cadc;
+  --color-line: rgba(255, 255, 255, 0.15);
+  --font-sans: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@layer components {
+  .glass {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid var(--color-line);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+  }
+
+  .btn-accent {
+    background: var(--color-accent);
+    color: var(--color-accent-ink);
+    font-weight: 800;
+    border-radius: 22px;
+    box-shadow:
+      0 0 28px rgba(255, 138, 101, 0.55),
+      inset 0 2px 0 rgba(255, 255, 255, 0.45);
+  }
+
+  .btn-ghost {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 22px;
+    font-weight: 700;
+  }
+
+  .field {
+    width: 100%;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid var(--color-line);
+    border-radius: 16px;
+    padding: 12px 14px;
+    font-size: 16px;
+  }
+
+  .field::placeholder {
+    color: #a79fb3;
+  }
+
+  .skeleton {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.12) 50%, rgba(255, 255, 255, 0.05) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.2s linear infinite;
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes drift-a {
+  from {
+    transform: translate(-40px, -20px) scale(1);
+  }
+  to {
+    transform: translate(110px, 80px) scale(1.25);
+  }
+}
+
+@keyframes drift-b {
+  from {
+    transform: translate(40px, 30px) scale(1.2);
+  }
+  to {
+    transform: translate(-90px, -60px) scale(0.9);
+  }
+}
+
+@keyframes ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes scan {
+  from {
+    top: 0;
+  }
+  to {
+    top: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
