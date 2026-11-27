@@ -134,7 +134,9 @@ export default function Coffee() {
   }, []);
   useNewEvent(openQuick);
 
-  const beans = useMemo(() => [...new Set((shots ?? []).map((s) => s.bean).filter(Boolean))], [shots]);
+  // Most recently used first.
+  const beans = useMemo(() => [...new Set((shots ?? []).map((s) => s.bean).filter(Boolean).reverse())], [shots]);
+  const otherBeans = beans.filter((b) => b !== bean.trim()).slice(0, 6);
   const charted = useMemo(() => {
     const b = bean.trim();
     const same = ofMethod.filter((s) => s.bean === b);
@@ -325,16 +327,30 @@ export default function Coffee() {
             </button>
           )}
 
-          <div className="flex min-w-0 flex-col gap-1.5">
-              <label htmlFor="bean" className="text-xs font-semibold text-sub">
-                咖啡豆
-              </label>
-              <input id="bean" list="beans" className="field" value={bean} maxLength={60} placeholder="例如：耶加雪菲" onChange={(e) => setBean(e.target.value)} />
-              <datalist id="beans">
-                {beans.map((b) => (
-                  <option key={b} value={b} />
+          {/* Same card language as the steppers below: centred label, large value. */}
+          <div className="glass flex min-w-0 flex-col items-center gap-0.5 rounded-[20px] px-3 pb-3 pt-2.5 transition-colors duration-300 focus-within:border-accent/70">
+            <label htmlFor="bean" className="text-xs text-sub">
+              咖啡豆
+            </label>
+            <input
+              id="bean"
+              className="w-full min-w-0 bg-transparent text-center text-2xl font-extrabold outline-none placeholder:font-semibold placeholder:text-[#8f879b] lg:text-[28px]"
+              value={bean}
+              maxLength={60}
+              placeholder="填写咖啡豆名称"
+              autoComplete="off"
+              enterKeyHint="done"
+              onChange={(e) => setBean(e.target.value)}
+            />
+            {otherBeans.length > 0 && (
+              <div className="mt-2 flex flex-wrap justify-center gap-1.5">
+                {otherBeans.map((b) => (
+                  <button key={b} onClick={() => setBean(b)} className="h-9 max-w-full truncate rounded-full bg-white/10 px-3.5 text-[13px] font-semibold text-sub active:bg-white/20">
+                    {b}
+                  </button>
                 ))}
-              </datalist>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-3 gap-2.5 lg:grid-cols-2 lg:gap-3">
