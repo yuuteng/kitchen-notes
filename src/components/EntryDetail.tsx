@@ -84,7 +84,7 @@ export default function EntryDetail({ entry, variant, onEdit, onDelete, onClose 
                   key={`${entry.id}-${i}`}
                   aria-pressed={!!done[i]}
                   onClick={() => setDone((d) => ({ ...d, [i]: !d[i] }))}
-                  className={`flex min-h-12 items-center justify-between gap-2 rounded-2xl border px-3.5 py-2 text-left text-[15px] transition-[background-color,border-color,box-shadow,color] duration-300 ${
+                  className={`flex min-h-12 items-center justify-between gap-2 rounded-2xl border px-3.5 last:odd:col-span-2 py-2 text-left text-[15px] transition-[background-color,border-color,box-shadow,color] duration-300 ${
                     done[i] ? 'border-accent bg-accent text-accent-ink shadow-[0_0_22px_rgba(255,138,101,.6)]' : 'border-white/15 bg-white/[.08] text-ink'
                   }`}
                 >
