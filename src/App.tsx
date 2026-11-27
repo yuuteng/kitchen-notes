@@ -1,7 +1,7 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { getUser, setUser } from './lib/api';
+import { forgetUser, getRecentUsers, getUser, rememberUser, setUser } from './lib/api';
 import { EASE } from './lib/hooks';
 import Entries from './pages/Entries';
 import Coffee from './pages/Coffee';
@@ -63,6 +63,7 @@ function Blobs() {
 
 function Login({ onEnter }: { onEnter: (name: string) => void }) {
   const [name, setName] = useState('');
+  const [recent, setRecent] = useState(getRecentUsers);
   const submit = (e: FormEvent) => {
     e.preventDefault();
     const clean = name.trim();
@@ -83,10 +84,38 @@ function Login({ onEnter }: { onEnter: (name: string) => void }) {
         <label htmlFor="user" className="text-sm font-semibold">
           用户名
         </label>
-        <input id="user" className="field" value={name} maxLength={24} autoFocus autoComplete="username" placeholder="请输入用户名" onChange={(e) => setName(e.target.value)} />
+        <input id="user" className="field" value={name} maxLength={24} autoFocus={recent.length === 0} autoComplete="username" placeholder="请输入用户名" onChange={(e) => setName(e.target.value)} />
         <button type="submit" disabled={!name.trim()} className="btn-accent h-14 text-lg">
           进入
         </button>
+        {recent.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-semibold">最近使用</span>
+            <ul className="flex flex-col gap-2">
+              {recent.map((n) => (
+                <li key={n} className="flex overflow-hidden rounded-2xl border border-white/15 bg-white/[.08]">
+                  <button type="button" onClick={() => onEnter(n)} className="flex h-12 min-w-0 flex-1 items-center gap-3 px-3.5 text-left text-ink active:bg-white/10">
+                    <span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-extrabold text-accent-ink">
+                      {[...n][0].toUpperCase()}
+                    </span>
+                    <span className="truncate text-[15px] font-semibold">{n}</span>
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={`从最近使用中移除 ${n}`}
+                    onClick={() => {
+                      forgetUser(n);
+                      setRecent(getRecentUsers());
+                    }}
+                    className="flex h-12 w-11 shrink-0 items-center justify-center text-lg text-sub active:bg-white/10"
+                  >
+                    ×
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         <p className="text-xs leading-relaxed text-sub">数据按用户名区分。</p>
       </motion.form>
     </div>
@@ -159,10 +188,12 @@ function Shell({ user, children }: { user: string; children: ReactNode }) {
 export default function App() {
   const [user, setUserState] = useState(getUser);
   const enter = (name: string) => {
+    rememberUser(name);
     setUser(name);
     setUserState(name);
   };
   const leave = () => {
+    rememberUser(user); // covers sessions that began before the list existed
     setUser('');
     setUserState('');
   };

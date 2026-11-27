@@ -62,6 +62,35 @@ export const setUser = (name: string) => {
   }
 };
 
+// Usernames used on this device, most recent first. Kept in this browser only.
+const RECENT_KEY = 'kn_recent';
+
+export const getRecentUsers = (): string[] => {
+  try {
+    const list: unknown = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+    return Array.isArray(list) ? list.filter((n): n is string => typeof n === 'string' && !!n).slice(0, 5) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveRecent = (list: string[]) => {
+  try {
+    localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, 5)));
+  } catch {
+    /* storage unavailable: the list is a convenience only */
+  }
+};
+
+// The server ignores case, so "Test" and "test" are one entry.
+const sameUser = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
+
+export const rememberUser = (name: string) => {
+  if (name.trim()) saveRecent([name.trim(), ...getRecentUsers().filter((n) => !sameUser(n, name))]);
+};
+
+export const forgetUser = (name: string) => saveRecent(getRecentUsers().filter((n) => !sameUser(n, name)));
+
 async function req<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers);
   headers.set('x-user', encodeURIComponent(getUser()));
