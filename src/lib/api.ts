@@ -89,6 +89,7 @@ export const api = {
 
   listShots: () => req<Shot[]>('shots'),
   createShot: (s: ShotInput) => req<Shot>('shots', { method: 'POST', body: JSON.stringify(s) }),
+  updateShot: (id: number, s: ShotInput) => req<Shot>(`shots/${id}`, { method: 'PUT', body: JSON.stringify(s) }),
   deleteShot: (id: number) => req<{ ok: true }>(`shots/${id}`, { method: 'DELETE' }),
 
   extractEntry: (kind: Kind, text: string) => req<{ name: string; data: EntryData }>('extract', { method: 'POST', body: JSON.stringify({ kind, text }) }),

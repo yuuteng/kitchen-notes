@@ -16,7 +16,7 @@ async function decode(file: Blob): Promise<Source> {
     try {
       return await createImageBitmap(file, { imageOrientation: 'from-image' });
     } catch {
-      /* fall through to <img>, which decodes a few formats createImageBitmap rejects */
+      /* fall through to an image element, which decodes a few formats createImageBitmap rejects */
     }
   }
   const url = URL.createObjectURL(file);
@@ -40,7 +40,7 @@ function draw(source: Source, maxEdge: number): HTMLCanvasElement {
   canvas.width = Math.max(1, Math.round(w * scale));
   canvas.height = Math.max(1, Math.round(h * scale));
   const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('浏览器不支持图片处理');
+  if (!ctx) throw new Error('当前浏览器不支持图片处理');
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
   return canvas;
@@ -79,7 +79,7 @@ export async function compressPhoto(file: File): Promise<CompressedPhoto> {
   try {
     source = await decode(file);
   } catch {
-    throw new Error('这张图片读取不了，换一张试试（部分浏览器不支持 HEIC 格式）');
+    throw new Error('无法读取该图片，请更换后重试。部分浏览器不支持 HEIC 格式。');
   }
   try {
     const full = await encode(source, FULL_EDGE, FULL_TARGET_BYTES);

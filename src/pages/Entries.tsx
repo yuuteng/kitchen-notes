@@ -9,8 +9,8 @@ import EntryDetail from '../components/EntryDetail';
 import EntryEditor from '../components/EntryEditor';
 
 const COPY = {
-  recipe: { title: '食谱', unit: '道菜', search: '搜索菜名或食材', empty: '还没有食谱。想到一个做法，点下面的加号随手写下来，AI 会帮你整理成用料和步骤。' },
-  cocktail: { title: '调酒', unit: '款酒', search: '搜索酒名或材料', empty: '还没有配方。点下面的加号，把配方写下来或直接粘贴，AI 会帮你整理成材料和步骤。' },
+  recipe: { title: '食谱', unit: '份食谱', all: '全部食谱', search: '搜索菜名或用料', empty: '暂无食谱。点击下方“+”添加，可粘贴文字并由 AI 自动整理。' },
+  cocktail: { title: '调酒', unit: '款配方', all: '全部配方', search: '搜索酒名或材料', empty: '暂无配方。点击下方“+”添加，可粘贴文字并由 AI 自动整理。' },
 };
 
 export default function Entries({ kind }: { kind: Kind }) {
@@ -76,7 +76,7 @@ export default function Entries({ kind }: { kind: Kind }) {
           <h1 className="flex-1 text-[34px] font-extrabold lg:text-4xl">{copy.title}</h1>
           {items && items.length > 0 && (
             <span className="text-[13px] text-sub lg:order-last lg:w-full">
-              {items.length} {copy.unit}
+              共 {items.length} {copy.unit}
             </span>
           )}
           <button onClick={openNew} className="btn-accent hidden h-[46px] !rounded-2xl px-5 text-base lg:block">
@@ -113,14 +113,14 @@ export default function Entries({ kind }: { kind: Kind }) {
 
         {items && items.length === 0 && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: EASE }} className="glass mt-8 rounded-[28px] p-6">
-            <p className="text-base leading-relaxed text-sub">{desktop ? copy.empty.replace('下面的加号', '右上角的“新建”') : copy.empty}</p>
+            <p className="text-base leading-relaxed text-sub">{desktop ? copy.empty.replace('下方“+”', '右上角“新建”') : copy.empty}</p>
           </motion.div>
         )}
 
         {showCarousel && items && <Carousel items={items.slice(0, 7)} onOpen={(e) => setSelId(e.id)} />}
-        {showCarousel && <h2 className="mt-4 text-lg font-extrabold">全部</h2>}
+        {showCarousel && <h2 className="mt-4 text-lg font-extrabold">{copy.all}</h2>}
 
-        {items && items.length > 0 && filtered.length === 0 && <p className="mt-8 text-base text-sub">没有找到“{q.trim()}”。换个词试试。</p>}
+        {items && items.length > 0 && filtered.length === 0 && <p className="mt-8 text-base text-sub">未找到与“{q.trim()}”相关的结果。</p>}
 
         <div className="mt-4 grid grid-cols-2 gap-3 lg:mt-6 lg:grid-cols-3 lg:gap-[18px]">
           {filtered.map((entry, i) => {

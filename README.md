@@ -29,6 +29,10 @@ pnpm dev            # vite on :5173, proxies /api to :8788
 
 ## Deploy
 
+Pushing to `main` runs `.github/workflows/deploy.yml`, which builds, applies D1 migrations and deploys to Cloudflare Pages. It needs two repository secrets: `CLOUDFLARE_API_TOKEN` (permissions: Cloudflare Pages Edit, D1 Edit) and `CLOUDFLARE_ACCOUNT_ID`.
+
+To deploy by hand instead:
+
 ```sh
 pnpm db:migrate     # apply migrations/ to the remote D1 database
 pnpm deploy         # build and upload to Cloudflare Pages

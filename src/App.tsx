@@ -79,15 +79,15 @@ function Login({ onEnter }: { onEnter: (name: string) => void }) {
         className="glass relative flex w-full max-w-sm flex-col gap-4 rounded-[30px] p-7"
       >
         <h1 className="text-3xl font-extrabold">厨房手记</h1>
-        <p className="text-sm leading-relaxed text-sub">食谱、咖啡和鸡尾酒，记在同一个地方。输入一个用户名进入，下次用同一个名字就能看到自己的记录。</p>
+        <p className="text-sm leading-relaxed text-sub">记录食谱、咖啡参数与鸡尾酒配方。输入用户名即可开始使用。</p>
         <label htmlFor="user" className="text-sm font-semibold">
           用户名
         </label>
-        <input id="user" className="field" value={name} maxLength={24} autoFocus autoComplete="username" placeholder="比如 teng" onChange={(e) => setName(e.target.value)} />
+        <input id="user" className="field" value={name} maxLength={24} autoFocus autoComplete="username" placeholder="请输入用户名" onChange={(e) => setName(e.target.value)} />
         <button type="submit" disabled={!name.trim()} className="btn-accent h-14 text-lg">
           进入
         </button>
-        <p className="text-xs leading-relaxed text-sub">没有密码。知道用户名的人都能看到和修改这个名字下的记录，起一个别人猜不到的名字更稳妥。</p>
+        <p className="text-xs leading-relaxed text-sub">本应用不设密码，数据按用户名区分。请使用不易被他人猜到的用户名。</p>
       </motion.form>
     </div>
   );

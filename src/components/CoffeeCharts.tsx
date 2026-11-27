@@ -42,9 +42,9 @@ interface Props {
 
 type Tab = 'map' | 'ratio' | 'trend';
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'map', label: '调参地图' },
-  { id: 'ratio', label: '粉液比' },
-  { id: 'trend', label: '评分走势' },
+  { id: 'map', label: '研磨 / 时间' },
+  { id: 'ratio', label: '粉液比 / 时间' },
+  { id: 'trend', label: '评分趋势' },
 ];
 
 function Legend({ items }: { items: [string, string][] }) {
@@ -80,17 +80,17 @@ export default function CoffeeCharts({ method, shots, current }: Props) {
   if (tab === 'map') {
     const sx = scale([...mapPts.map((p) => p.grind), current.grind], 0.6, 0.1);
     const sy = scale([...mapPts.map((p) => p.time_s), current.time_s, ...target.time], 10, method === 'pourover' ? 15 : 3);
-    caption = '横轴研磨度（左细右粗）· 纵轴萃取时间 · 白圈是这一杯';
+    caption = '横轴为研磨度（左细右粗），纵轴为萃取时间，白色圆环为当前参数';
     legend = [
-      ['#5C4D4B', '差'],
-      ['#A8705F', '中'],
-      ['#FF8A65', '好'],
+      ['#5C4D4B', '评分 1–4'],
+      ['#A8705F', '5–6'],
+      ['#FF8A65', '7–10'],
     ];
     body = (
       <>
         <rect x={PAD.l} y={y(sy.at(target.time[1]))} width={PW} height={y(sy.at(target.time[0])) - y(sy.at(target.time[1]))} fill="rgba(255,138,101,.15)" stroke="#8A5C50" strokeDasharray="4 3" />
         <text x={W - PAD.r - 4} y={y(sy.at(target.time[1])) + 12} textAnchor="end" fontSize="10" fill="#F0B8A6">
-          目标 {secs(target.time[0], method)}–{secs(target.time[1], method)}
+          目标区间 {secs(target.time[0], method)}–{secs(target.time[1], method)}
         </text>
         <text x={PAD.l - 6} y={PAD.t + 9} textAnchor="end" fontSize="10" fill="#D2CADC">
           {secs(sy.hi, method)}
@@ -118,7 +118,7 @@ export default function CoffeeCharts({ method, shots, current }: Props) {
   } else if (tab === 'ratio') {
     const sx = scale([...ratioPts.map((p) => p.time), current.time_s, ...target.time], 10, method === 'pourover' ? 15 : 3);
     const sy = scale([...ratioPts.map((p) => p.ratio), current.ratio, ...target.ratio], method === 'pourover' ? 4 : 1, method === 'pourover' ? 1 : 0.2);
-    caption = '横轴萃取时间 · 纵轴粉液比 · 方框是目标区 · 白圈是这一杯';
+    caption = '横轴为萃取时间，纵轴为粉液比，虚线框为目标区间，白色圆环为当前参数';
     legend = [
       ['#F6F3FA', '偏酸'],
       ['#FF8A65', '平衡'],
@@ -161,7 +161,7 @@ export default function CoffeeCharts({ method, shots, current }: Props) {
     const n = Math.max(trendPts.length - 1, 1);
     const px = (i: number) => x(trendPts.length === 1 ? 0.5 : i / n);
     const py = (s: number) => y((s - 1) / 9);
-    caption = '从左到右是时间先后 · 越高越好喝';
+    caption = '按记录时间先后排列，纵轴为评分';
     body = (
       <>
         {[1, 5, 10].map((s) => (
@@ -187,7 +187,7 @@ export default function CoffeeCharts({ method, shots, current }: Props) {
         )}
         {trendPts.map((p, i) => (
           <circle key={p.id} cx={px(i)} cy={py(p.score)} r="4.5" fill="#FF8A65" stroke="#0B0A10" strokeWidth="2">
-            <title>{`第 ${i + 1} 杯 · 评分 ${p.score}`}</title>
+            <title>{`第 ${i + 1} 条 · 评分 ${p.score}`}</title>
           </circle>
         ))}
       </>
@@ -215,7 +215,7 @@ export default function CoffeeCharts({ method, shots, current }: Props) {
         {body}
         {empty && (
           <text x={PAD.l + PW / 2} y={PAD.t + PH / 2 - 16} textAnchor="middle" fontSize="12" fill="#D2CADC">
-            记下第一杯后，这里开始出现数据点
+            暂无数据，保存记录后在此显示
           </text>
         )}
       </svg>

@@ -13,8 +13,8 @@ interface Props {
 }
 
 const COPY = {
-  recipe: { title: '食谱', name: '菜名', ph: '比如：今天做了番茄炒蛋，3 个鸡蛋 2 个番茄，先炒蛋盛出，再炒番茄出汁，倒回鸡蛋加盐和一点糖。', item: '用料' },
-  cocktail: { title: '鸡尾酒', name: '酒名', ph: '比如：Negroni，金酒、金巴利、甜味美思各 30ml，加冰搅拌，倒进古典杯，放一片橙皮。', item: '材料' },
+  recipe: { title: '食谱', name: '菜名', ph: '示例：番茄炒蛋。鸡蛋 3 个、番茄 2 个。先炒蛋盛出，再炒番茄至出汁，倒回鸡蛋，加盐和少许糖。', item: '用料' },
+  cocktail: { title: '鸡尾酒', name: '酒名', ph: '示例：Negroni。金酒、金巴利、甜味美思各 30 ml，加冰搅拌，倒入古典杯，以橙皮装饰。', item: '材料' },
 };
 
 const closeIcon = (
@@ -73,7 +73,7 @@ export default function EntryEditor({ kind, entry, onClose, onSaved }: Props) {
   };
 
   const save = async () => {
-    if (!name.trim()) return setError(`请先填${copy.name}`);
+    if (!name.trim()) return setError(`请填写${copy.name}`);
     setSaving(true);
     setError('');
     try {
@@ -104,7 +104,7 @@ export default function EntryEditor({ kind, entry, onClose, onSaved }: Props) {
     <motion.div
       role="dialog"
       aria-modal="true"
-      aria-label={`${entry ? '编辑' : '新'}${copy.title}`}
+      aria-label={`${entry ? '编辑' : '新建'}${copy.title}`}
       initial={{ clipPath: 'circle(0% at 50% 94%)' }}
       animate={{ clipPath: 'circle(150% at 50% 94%)' }}
       exit={{ clipPath: 'circle(0% at 50% 94%)' }}
@@ -116,7 +116,7 @@ export default function EntryEditor({ kind, entry, onClose, onSaved }: Props) {
           取消
         </button>
         <span className="text-base font-bold">
-          {entry ? '编辑' : '新'}
+          {entry ? '编辑' : '新建'}
           {copy.title}
         </span>
         <span className="w-14" />
@@ -127,9 +127,9 @@ export default function EntryEditor({ kind, entry, onClose, onSaved }: Props) {
           {stage === 'text' ? (
             <div className="flex flex-col gap-3.5">
               <label htmlFor="raw" className="text-2xl font-extrabold">
-                随便写，或直接粘贴
+                输入或粘贴内容
               </label>
-              <p className="-mt-2 text-sm text-sub">不用分{copy.item}和步骤，AI 会整理好，你确认后再保存。</p>
+              <p className="-mt-2 text-sm text-sub">无需区分{copy.item}与步骤，AI 将自动整理，确认后保存。</p>
               <div className="relative overflow-hidden rounded-[22px] border border-white/20 bg-white/[.07]">
                 <textarea
                   id="raw"
@@ -150,10 +150,10 @@ export default function EntryEditor({ kind, entry, onClose, onSaved }: Props) {
                 <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-current">
                   <path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" />
                 </svg>
-                {thinking ? `正在读取${copy.item}和步骤` : 'AI 整理'}
+                {thinking ? '正在整理…' : 'AI 整理'}
               </button>
               <button onClick={() => setStage('form')} disabled={thinking} className="h-11 text-[15px] text-sub">
-                我想自己手动填
+                手动填写
               </button>
             </div>
           ) : (
@@ -166,10 +166,10 @@ export default function EntryEditor({ kind, entry, onClose, onSaved }: Props) {
               </motion.div>
 
               <motion.div {...rise(1)} className="flex items-center gap-3">
-                {shownPhoto && <img src={shownPhoto} alt="已选的照片" className="h-20 w-20 rounded-2xl object-cover" />}
+                {shownPhoto && <img src={shownPhoto} alt="已选照片" className="h-20 w-20 rounded-2xl object-cover" />}
                 <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => pickPhoto(e.target.files?.[0])} />
                 <button onClick={() => fileRef.current?.click()} disabled={compressing} className="h-12 flex-1 rounded-2xl border border-dashed border-white/35 text-[15px] text-sub">
-                  {compressing ? '正在压缩照片' : shownPhoto ? '换一张照片' : '加一张照片（可不加）'}
+                  {compressing ? '正在处理照片…' : shownPhoto ? '更换照片' : '添加照片（可选）'}
                 </button>
                 {shownPhoto && (
                   <button
@@ -192,13 +192,13 @@ export default function EntryEditor({ kind, entry, onClose, onSaved }: Props) {
                     <label htmlFor="glass" className="text-sm font-semibold text-sub">
                       杯型
                     </label>
-                    <input id="glass" className="field" value={data.glass} placeholder="古典杯" onChange={(e) => setData({ ...data, glass: e.target.value })} />
+                    <input id="glass" className="field" value={data.glass} placeholder="例如：古典杯" onChange={(e) => setData({ ...data, glass: e.target.value })} />
                   </div>
                   <div className="flex flex-col gap-2">
                     <label htmlFor="method" className="text-sm font-semibold text-sub">
                       调制方式
                     </label>
-                    <input id="method" className="field" value={data.method} placeholder="搅拌" onChange={(e) => setData({ ...data, method: e.target.value })} />
+                    <input id="method" className="field" value={data.method} placeholder="例如：搅拌" onChange={(e) => setData({ ...data, method: e.target.value })} />
                   </div>
                 </motion.div>
               )}
@@ -207,12 +207,12 @@ export default function EntryEditor({ kind, entry, onClose, onSaved }: Props) {
                 <h3 className="text-sm font-semibold text-sub">{copy.item}</h3>
                 {data.ingredients.map((g, i) => (
                   <motion.div {...rise(i + 2)} key={i} className="flex gap-2">
-                    <input aria-label={`${copy.item}名`} className="field min-w-0 flex-[3]" value={g.name} placeholder={copy.item} onChange={(e) => setIng(i, { name: e.target.value })} />
+                    <input aria-label={`${copy.item}名`} className="field min-w-0 flex-[3]" value={g.name} placeholder="名称" onChange={(e) => setIng(i, { name: e.target.value })} />
                     <input
                       aria-label="用量"
                       className={`field min-w-0 flex-[2] ${g.amount ? '' : '!border-accent/70'}`}
                       value={g.amount}
-                      placeholder="未写"
+                      placeholder="未注明"
                       onChange={(e) => setIng(i, { amount: e.target.value })}
                     />
                     <button aria-label={`删除${g.name || copy.item}`} onClick={() => setData((d) => ({ ...d, ingredients: d.ingredients.filter((_, j) => j !== i) }))} className="flex h-12 w-11 shrink-0 items-center justify-center text-sub">
@@ -221,9 +221,9 @@ export default function EntryEditor({ kind, entry, onClose, onSaved }: Props) {
                   </motion.div>
                 ))}
                 <button onClick={() => setData((d) => ({ ...d, ingredients: [...d.ingredients, { name: '', amount: '' }] }))} className="h-11 rounded-2xl border border-white/15 text-[15px] text-sub">
-                  加一样{copy.item}
+                  添加{copy.item}
                 </button>
-                {data.ingredients.some((g) => !g.amount) && <p className="text-xs text-accent">橙色框是原文没写用量的，AI 不会自己编。可以补上，也可以留空。</p>}
+                {data.ingredients.some((g) => !g.amount) && <p className="text-xs text-accent">标橙项为原文未注明用量，AI 不会自行补全。可补充，也可留空。</p>}
               </section>
 
               <section className="flex flex-col gap-2">
@@ -238,7 +238,7 @@ export default function EntryEditor({ kind, entry, onClose, onSaved }: Props) {
                   </motion.div>
                 ))}
                 <button onClick={() => setData((d) => ({ ...d, steps: [...d.steps, ''] }))} className="h-11 rounded-2xl border border-white/15 text-[15px] text-sub">
-                  加一步
+                  添加步骤
                 </button>
               </section>
 
@@ -246,7 +246,7 @@ export default function EntryEditor({ kind, entry, onClose, onSaved }: Props) {
                 <label htmlFor="note" className="text-sm font-semibold text-sub">
                   备注
                 </label>
-                <textarea id="note" className="field min-h-[76px] resize-y leading-relaxed" value={data.note} placeholder="下次想调整的地方" onChange={(e) => setData({ ...data, note: e.target.value })} />
+                <textarea id="note" className="field min-h-[76px] resize-y leading-relaxed" value={data.note} placeholder="可选，例如下次的调整方向" onChange={(e) => setData({ ...data, note: e.target.value })} />
               </div>
 
               {error && (
@@ -255,7 +255,7 @@ export default function EntryEditor({ kind, entry, onClose, onSaved }: Props) {
                 </p>
               )}
               <button onClick={save} disabled={saving || compressing} className="btn-accent h-[58px] text-lg">
-                {saving ? '正在保存' : '保存'}
+                {saving ? '保存中…' : '保存'}
               </button>
             </div>
           )}

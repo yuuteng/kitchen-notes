@@ -67,7 +67,7 @@ export default function Carousel({ items, onOpen }: { items: Entry[]; onOpen: (e
             >
               <div className="truncate px-6 text-[26px] font-extrabold">{cur.name}</div>
               <div className="mt-1 text-sm text-sub">
-                {formatDate(cur.created_at)}记下 · {cur.data.ingredients.length} 种用料 · {cur.data.steps.length} 步
+                {formatDate(cur.created_at)} · {cur.data.ingredients.length} 种用料 · {cur.data.steps.length} 个步骤
               </div>
             </motion.div>
           )}

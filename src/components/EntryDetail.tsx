@@ -65,16 +65,16 @@ export default function EntryDetail({ entry, variant, onEdit, onDelete, onClose 
         <motion.div {...stagger(0)} key={`h${entry.id}`}>
           <h2 className={`font-extrabold ${page ? 'text-[32px]' : 'text-[28px]'}`}>{entry.name}</h2>
           <div className="mt-1.5 text-sm text-sub">
-            {formatDate(entry.created_at)}记下{facts.map((f) => ` · ${f}`)}
+            创建于 {formatDate(entry.created_at)}{facts.map((f) => ` · ${f}`)}
           </div>
         </motion.div>
 
         {ingredients.length > 0 && (
           <section className="flex flex-col gap-2.5">
             <div className="flex items-baseline justify-between">
-              <h3 className="text-lg font-extrabold">用料</h3>
+              <h3 className="text-lg font-extrabold">{entry.kind === 'cocktail' ? '材料' : '用料'}</h3>
               <span className="text-[13px] text-sub">
-                备好一样点一下 · {doneCount} / {ingredients.length}
+                点击标记已备齐 · {doneCount} / {ingredients.length}
               </span>
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -89,7 +89,7 @@ export default function EntryDetail({ entry, variant, onEdit, onDelete, onClose 
                   }`}
                 >
                   <span className="min-w-0 break-words">{g.name}</span>
-                  <span className={`shrink-0 font-bold ${g.amount || done[i] ? '' : 'text-accent'}`}>{g.amount || '未写'}</span>
+                  <span className={`shrink-0 font-bold ${g.amount || done[i] ? '' : 'text-accent'}`}>{g.amount || '未注明'}</span>
                 </motion.button>
               ))}
             </div>
@@ -123,7 +123,7 @@ export default function EntryDetail({ entry, variant, onEdit, onDelete, onClose 
 
         <div className={page ? 'fixed inset-x-4 bottom-6 z-10 flex gap-2.5' : 'flex gap-2.5'}>
           <button onClick={remove} disabled={busy} className="btn-ghost h-14 flex-1 text-base backdrop-blur-xl">
-            {busy ? '正在删除' : confirming ? '确认删除' : '删除'}
+            {busy ? '删除中…' : confirming ? '确认删除' : '删除'}
           </button>
           <button onClick={onEdit} className="btn-accent h-14 flex-1 text-base">
             编辑

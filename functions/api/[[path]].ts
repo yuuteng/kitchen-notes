@@ -27,10 +27,10 @@ function getUser(request: Request): string {
   try {
     raw = decodeURIComponent(raw);
   } catch {
-    throw new HttpError(400, '用户名格式不对');
+    throw new HttpError(400, '用户名格式无效');
   }
   const user = raw.trim().toLowerCase();
-  if (!user || user.length > 24) throw new HttpError(401, '请先输入用户名');
+  if (!user || user.length > 24) throw new HttpError(401, '请输入用户名');
   return user;
 }
 
@@ -54,6 +54,26 @@ function cleanData(input: any) {
     .map((s: unknown) => str(s, 1000))
     .filter(Boolean);
   return { ingredients, steps, note: str(d.note), glass: str(d.glass, 40), method: str(d.method, 40) };
+}
+
+function shotValues(b: any) {
+  if (!METHODS.includes(b?.method)) throw new HttpError(400, '冲煮方式无效');
+  const score = num(b.score);
+  const taste = num(b.taste);
+  return [
+    b.method,
+    str(b.bean, 60),
+    /^\d{4}-\d{2}-\d{2}$/.test(b.roast_date || '') ? b.roast_date : null,
+    num(b.grind),
+    num(b.dose),
+    num(b.time_s),
+    num(b.yield_g),
+    num(b.pressure),
+    num(b.temp),
+    score === null ? null : Math.max(1, Math.min(10, Math.round(score))),
+    taste === null ? null : Math.max(-2, Math.min(2, Math.round(taste))),
+    str(b.note),
+  ];
 }
 
 const rowToEntry = (r: any) => ({ ...r, data: JSON.parse(r.data || '{}') });
@@ -101,12 +121,12 @@ function parseJsonLoose(raw: unknown): any {
 async function extract(env: Env, user: string, body: any) {
   const kind = String(body?.kind || '');
   const text = str(body?.text, 4000);
-  if (!PROMPTS[kind]) throw new HttpError(400, '不支持的类型');
-  if (text.length < 4) throw new HttpError(400, '文字太短，没法整理');
+  if (!PROMPTS[kind]) throw new HttpError(400, '不支持该记录类型');
+  if (text.length < 4) throw new HttpError(400, '内容过短，无法整理');
 
   const day = new Date().toISOString().slice(0, 10);
   const used = await env.DB.prepare('SELECT count FROM ai_usage WHERE user = ? AND day = ?').bind(user, day).first<{ count: number }>();
-  if ((used?.count ?? 0) >= AI_DAILY_LIMIT) throw new HttpError(429, `今天的 AI 整理次数已用完（每天 ${AI_DAILY_LIMIT} 次），可以手动填写`);
+  if ((used?.count ?? 0) >= AI_DAILY_LIMIT) throw new HttpError(429, `今日 AI 整理次数已达上限（${AI_DAILY_LIMIT} 次），请手动填写`);
   await env.DB.prepare('INSERT INTO ai_usage (user, day, count) VALUES (?, ?, 1) ON CONFLICT (user, day) DO UPDATE SET count = count + 1').bind(user, day).run();
 
   let lastError: unknown;
@@ -143,13 +163,13 @@ async function extract(env: Env, user: string, body: any) {
     }
   }
   console.error('AI extract failed', lastError);
-  throw new HttpError(502, 'AI 暂时不可用，可以手动填写');
+  throw new HttpError(502, 'AI 服务暂不可用，请手动填写');
 }
 
 // ---------- CSV ----------
 
 function toCsv(rows: any[]): string {
-  const head = ['时间', '方式', '豆子', '烘焙日期', '研磨度', '粉量g', '时间s', '液量g', '压力bar', '水温C', '评分', '口感(-2很酸~2很苦)', '备注'];
+  const head = ['时间', '方式', '咖啡豆', '烘焙日期', '研磨度', '粉量g', '时间s', '液量g', '压力bar', '水温C', '评分', '口感(-2很酸~2很苦)', '备注'];
   const cols = ['created_at', 'method', 'bean', 'roast_date', 'grind', 'dose', 'time_s', 'yield_g', 'pressure', 'temp', 'score', 'taste', 'note'];
   const cell = (v: unknown) => {
     const s = v === null || v === undefined ? '' : String(v);
@@ -185,9 +205,9 @@ async function handle(request: Request, env: Env, path: string): Promise<Respons
     const form = await request.formData();
     const full = form.get('full') as unknown as File | null;
     const thumb = form.get('thumb') as unknown as File | null;
-    if (!full || typeof full === 'string' || !thumb || typeof thumb === 'string') throw new HttpError(400, '缺少图片');
-    if (full.size > MAX_PHOTO_BYTES || thumb.size > MAX_PHOTO_BYTES) throw new HttpError(413, '图片太大');
-    if (!/^image\/(webp|jpeg)$/.test(full.type) || !/^image\/(webp|jpeg)$/.test(thumb.type)) throw new HttpError(415, '图片格式不支持');
+    if (!full || typeof full === 'string' || !thumb || typeof thumb === 'string') throw new HttpError(400, '未收到图片');
+    if (full.size > MAX_PHOTO_BYTES || thumb.size > MAX_PHOTO_BYTES) throw new HttpError(413, '图片大小超出限制');
+    if (!/^image\/(webp|jpeg)$/.test(full.type) || !/^image\/(webp|jpeg)$/.test(thumb.type)) throw new HttpError(415, '不支持该图片格式');
     const id = crypto.randomUUID();
     const ext = full.type === 'image/webp' ? 'webp' : 'jpg';
     const text = thumb.type === 'image/webp' ? 'webp' : 'jpg';
@@ -210,8 +230,8 @@ async function handle(request: Request, env: Env, path: string): Promise<Respons
     if (method === 'POST') {
       const b: any = await request.json();
       const name = str(b.name, 80);
-      if (!KINDS.includes(b.kind)) throw new HttpError(400, '类型不对');
-      if (!name) throw new HttpError(400, '请填写名字');
+      if (!KINDS.includes(b.kind)) throw new HttpError(400, '记录类型无效');
+      if (!name) throw new HttpError(400, '请填写名称');
       const row = await env.DB.prepare('INSERT INTO entries (user, kind, name, data, photo, thumb) VALUES (?, ?, ?, ?, ?, ?) RETURNING *')
         .bind(user, b.kind, name, JSON.stringify(cleanData(b.data)), photoKey(b.photo), photoKey(b.thumb))
         .first();
@@ -219,11 +239,11 @@ async function handle(request: Request, env: Env, path: string): Promise<Respons
     }
     const id = Number(arg);
     const old = await env.DB.prepare('SELECT * FROM entries WHERE id = ? AND user = ?').bind(id, user).first<any>();
-    if (!old) throw new HttpError(404, '没有这条记录');
+    if (!old) throw new HttpError(404, '记录不存在');
     if (method === 'PUT') {
       const b: any = await request.json();
       const name = str(b.name, 80);
-      if (!name) throw new HttpError(400, '请填写名字');
+      if (!name) throw new HttpError(400, '请填写名称');
       const photo = photoKey(b.photo);
       const thumb = photoKey(b.thumb);
       const row = await env.DB.prepare('UPDATE entries SET name = ?, data = ?, photo = ?, thumb = ? WHERE id = ? AND user = ? RETURNING *')
@@ -251,32 +271,21 @@ async function handle(request: Request, env: Env, path: string): Promise<Respons
       return json(results);
     }
     if (method === 'POST') {
-      const b: any = await request.json();
-      if (!METHODS.includes(b.method)) throw new HttpError(400, '冲煮方式不对');
-      const score = num(b.score);
-      const taste = num(b.taste);
-      const values = [
-        b.method,
-        str(b.bean, 60),
-        /^\d{4}-\d{2}-\d{2}$/.test(b.roast_date || '') ? b.roast_date : null,
-        num(b.grind),
-        num(b.dose),
-        num(b.time_s),
-        num(b.yield_g),
-        num(b.pressure),
-        num(b.temp),
-        score === null ? null : Math.max(1, Math.min(10, Math.round(score))),
-        taste === null ? null : Math.max(-2, Math.min(2, Math.round(taste))),
-        str(b.note),
-      ];
       const row = await env.DB.prepare(`INSERT INTO shots (user, ${SHOT_COLS.join(', ')}) VALUES (?, ${SHOT_COLS.map(() => '?').join(', ')}) RETURNING *`)
-        .bind(user, ...values)
+        .bind(user, ...shotValues(await request.json()))
         .first();
       return json(row, 201);
     }
+    if (method === 'PUT') {
+      const row = await env.DB.prepare(`UPDATE shots SET ${SHOT_COLS.map((c) => `${c} = ?`).join(', ')} WHERE id = ? AND user = ? RETURNING *`)
+        .bind(...shotValues(await request.json()), Number(arg), user)
+        .first();
+      if (!row) throw new HttpError(404, '记录不存在');
+      return json(row);
+    }
     if (method === 'DELETE') {
       const res = await env.DB.prepare('DELETE FROM shots WHERE id = ? AND user = ?').bind(Number(arg), user).run();
-      if (!res.meta.changes) throw new HttpError(404, '没有这条记录');
+      if (!res.meta.changes) throw new HttpError(404, '记录不存在');
       return json({ ok: true });
     }
   }
@@ -292,6 +301,6 @@ export const onRequest: PagesFunction<Env> = async ({ request, env, params }) =>
   } catch (e) {
     if (e instanceof HttpError) return json({ error: e.message }, e.status);
     console.error(e);
-    return json({ error: '服务器出错了，请稍后再试' }, 500);
+    return json({ error: '服务异常，请稍后重试' }, 500);
   }
 };
