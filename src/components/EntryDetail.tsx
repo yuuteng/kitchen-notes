@@ -74,7 +74,7 @@ export default function EntryDetail({ entry, variant, onEdit, onDelete, onClose 
             <div className="flex items-baseline justify-between">
               <h3 className="text-lg font-extrabold">{entry.kind === 'cocktail' ? '材料' : '用料'}</h3>
               <span className="text-[13px] text-sub">
-                点击标记已备齐 · {doneCount} / {ingredients.length}
+                备料时点击可划掉 · 已备 {doneCount} / {ingredients.length}
               </span>
             </div>
             <div className="grid grid-cols-2 gap-2">
