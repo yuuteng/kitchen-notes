@@ -89,7 +89,7 @@ export default function EntryDetail({ entry, variant, onEdit, onDelete, onClose 
                   }`}
                 >
                   <span className="min-w-0 break-words">{g.name}</span>
-                  <span className={`shrink-0 font-bold ${g.amount || done[i] ? '' : 'text-accent'}`}>{g.amount || '未注明'}</span>
+                  {g.amount && <span className="shrink-0 font-bold">{g.amount}</span>}
                 </motion.button>
               ))}
             </div>

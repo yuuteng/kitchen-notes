@@ -210,9 +210,9 @@ export default function EntryEditor({ kind, entry, onClose, onSaved }: Props) {
                     <input aria-label={`${copy.item}名`} className="field min-w-0 flex-[3]" value={g.name} placeholder="名称" onChange={(e) => setIng(i, { name: e.target.value })} />
                     <input
                       aria-label="用量"
-                      className={`field min-w-0 flex-[2] ${g.amount ? '' : '!border-accent/70'}`}
+                      className="field min-w-0 flex-[2]"
                       value={g.amount}
-                      placeholder="未注明"
+                      placeholder="用量（可选）"
                       onChange={(e) => setIng(i, { amount: e.target.value })}
                     />
                     <button aria-label={`删除${g.name || copy.item}`} onClick={() => setData((d) => ({ ...d, ingredients: d.ingredients.filter((_, j) => j !== i) }))} className="flex h-12 w-11 shrink-0 items-center justify-center text-sub">
@@ -223,7 +223,7 @@ export default function EntryEditor({ kind, entry, onClose, onSaved }: Props) {
                 <button onClick={() => setData((d) => ({ ...d, ingredients: [...d.ingredients, { name: '', amount: '' }] }))} className="h-11 rounded-2xl border border-white/15 text-[15px] text-sub">
                   添加{copy.item}
                 </button>
-                {data.ingredients.some((g) => !g.amount) && <p className="text-xs text-accent">标橙项为原文未注明用量，AI 不会自行补全。可补充，也可留空。</p>}
+                {data.ingredients.some((g) => !g.amount) && <p className="text-xs text-sub">用量可留空。AI 整理时不会补全原文未提及的用量。</p>}
               </section>
 
               <section className="flex flex-col gap-2">
