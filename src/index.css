@@ -41,11 +41,14 @@ button:disabled {
   opacity: 0.55;
 }
 
-input,
-textarea,
-select {
-  font: inherit;
-  color: inherit;
+/* In the base layer, so size and weight utilities on a form control still win. */
+@layer base {
+  input,
+  textarea,
+  select {
+    font: inherit;
+    color: inherit;
+  }
 }
 
 :focus-visible {
