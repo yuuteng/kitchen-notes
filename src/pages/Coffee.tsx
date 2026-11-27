@@ -74,6 +74,12 @@ function diffOf(method: Method, prev: Shot | undefined, cur: Shot): string[] {
   return out;
 }
 
+// Local calendar date as YYYY-MM-DD (toISOString would give the UTC date).
+function today() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 export default function Coffee() {
   const [shots, setShots] = useState<Shot[] | null>(null);
   const [loadError, setLoadError] = useState('');
@@ -81,7 +87,7 @@ export default function Coffee() {
   const [values, setValues] = useState<Values>(() => defaults('espresso'));
   const [taste, setTaste] = useState(0);
   const [bean, setBean] = useState('');
-  const [roast, setRoast] = useState('');
+  const [roast, setRoast] = useState(today);
   const [note, setNote] = useState('');
   const [onlyBean, setOnlyBean] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -111,7 +117,7 @@ export default function Coffee() {
     if (last) for (const f of FIELDS[m]) if (last[f.key] !== null) v[f.key] = last[f.key] as number;
     setValues(v);
     setBean(last?.bean ?? '');
-    setRoast(last?.roast_date ?? '');
+    setRoast(last?.roast_date ?? today());
     setTaste(0);
     setNote('');
   }, []);
