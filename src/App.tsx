@@ -87,7 +87,7 @@ function Login({ onEnter }: { onEnter: (name: string) => void }) {
         <button type="submit" disabled={!name.trim()} className="btn-accent h-14 text-lg">
           进入
         </button>
-        <p className="text-xs leading-relaxed text-sub">本应用不设密码，数据按用户名区分。请使用不易被他人猜到的用户名。</p>
+        <p className="text-xs leading-relaxed text-sub">数据按用户名区分。</p>
       </motion.form>
     </div>
   );

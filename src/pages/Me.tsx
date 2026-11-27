@@ -11,7 +11,7 @@ export default function Me({ user, onLeave }: { user: string; onLeave: () => voi
       <div className="glass flex flex-col gap-1 rounded-[26px] p-5">
         <span className="text-sm text-sub">当前用户</span>
         <span className="break-all text-2xl font-extrabold">{user}</span>
-        <p className="mt-2 text-sm leading-relaxed text-sub">在其他设备输入相同用户名，即可访问这些记录。本应用不设密码，数据按用户名区分。</p>
+        <p className="mt-2 text-sm leading-relaxed text-sub">在其他设备输入相同用户名，即可访问这些记录。数据按用户名区分。</p>
       </div>
       <button onClick={() => api.exportCsv().catch((e: Error) => setError(e.message))} className="btn-ghost h-14 text-base">
         导出咖啡记录（CSV）
