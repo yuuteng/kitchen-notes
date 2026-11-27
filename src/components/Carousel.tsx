@@ -50,6 +50,7 @@ export default function Carousel({ items, onOpen }: { items: Entry[]; onOpen: (e
               className="absolute left-1/2 top-0 -ml-[110px] h-[300px] w-[220px] overflow-hidden rounded-[30px] border border-white/20 bg-card p-0 text-ink shadow-[0_34px_70px_-18px_rgba(0,0,0,.75),inset_0_1px_0_rgba(255,255,255,.28)]"
             >
               <Cover entry={entry} big />
+              {entry.thumb && <span className="absolute inset-x-0 bottom-0 block truncate bg-gradient-to-t from-black/85 via-black/50 to-transparent px-4 pb-4 pt-12 text-left text-xl font-extrabold">{entry.name}</span>}
             </motion.button>
           );
         })}

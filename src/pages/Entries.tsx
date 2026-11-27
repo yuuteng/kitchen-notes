@@ -134,26 +134,20 @@ export default function Entries({ kind }: { kind: Kind }) {
                 whileHover={{ y: -6 }}
                 transition={{ duration: 0.5, ease: EASE, delay: Math.min(i * 0.05, 0.4) }}
                 onClick={() => setSelId(entry.id)}
-                className="flex flex-col gap-2 text-left text-ink"
+                className="block text-left text-ink"
               >
                 <span
-                  className={`block h-[190px] w-full overflow-hidden rounded-[26px] border bg-card transition-[border-color,box-shadow] duration-300 ${
+                  className={`relative block h-[190px] w-full overflow-hidden rounded-[26px] border bg-card transition-[border-color,box-shadow] duration-300 ${
                     active ? 'border-accent shadow-[0_0_30px_rgba(255,138,101,.45)]' : 'border-white/15 shadow-[0_22px_44px_-18px_rgba(0,0,0,.7),inset_0_1px_0_rgba(255,255,255,.28)]'
                   }`}
                 >
                   <Cover entry={entry} />
-                </span>
-                {entry.thumb && (
-                  <span className="px-1">
-                    <span className="block truncate text-[15px] font-semibold">{entry.name}</span>
-                    <span className="block truncate text-xs text-sub">
-                      {entry.data.ingredients
-                        .slice(0, 3)
-                        .map((g) => g.name)
-                        .join(' · ')}
+                  {entry.thumb && (
+                    <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/50 to-transparent px-3.5 pb-3 pt-10">
+                      <span className="block truncate text-base font-bold">{entry.name}</span>
                     </span>
-                  </span>
-                )}
+                  )}
+                </span>
               </motion.button>
             );
           })}
@@ -182,7 +176,7 @@ export default function Entries({ kind }: { kind: Kind }) {
       </AnimatePresence>
 
       <AnimatePresence>
-        {editing && <EntryEditor key="editor" kind={kind} entry={editing === 'new' ? undefined : editing} onClose={() => setEditing(null)} onSaved={onSaved} />}
+        {editing && <EntryEditor key={editing === 'new' ? 'new' : `edit-${editing.id}`} kind={kind} entry={editing === 'new' ? undefined : editing} onClose={() => setEditing(null)} onSaved={onSaved} />}
       </AnimatePresence>
     </div>
   );
