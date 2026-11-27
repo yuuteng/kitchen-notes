@@ -1,13 +1,9 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import type { Method, Shot } from '../lib/api';
 import { EASE } from '../lib/hooks';
 
-const W = 340;
-const H = 230;
-const PAD = { l: 38, r: 12, t: 12, b: 30 };
-const PW = W - PAD.l - PAD.r;
-const PH = H - PAD.t - PAD.b;
+const PAD = { l: 46, r: 14, t: 14, b: 30 };
 
 const TARGET: Record<Method, { time: [number, number]; ratio: [number, number] }> = {
   espresso: { time: [25, 30], ratio: [1.8, 2.2] },
@@ -18,7 +14,7 @@ const SCORE_COLOR = (s: number | null) => (s === null ? 'none' : s >= 7 ? '#FF8A
 const TASTE_COLOR = (t: number | null) => (t === null ? 'none' : t < 0 ? '#F6F3FA' : t > 0 ? '#6E5750' : '#FF8A65');
 
 /** Linear scale with padding so points never sit on the axes. */
-function scale(values: number[], minSpan: number, pad: number) {
+function scale(values: number[], minSpan: number, pad: number, snap: number) {
   let lo = Math.min(...values);
   let hi = Math.max(...values);
   if (hi - lo < minSpan) {
@@ -26,8 +22,9 @@ function scale(values: number[], minSpan: number, pad: number) {
     lo = mid - minSpan / 2;
     hi = mid + minSpan / 2;
   }
-  lo -= pad;
-  hi += pad;
+  // Snap the ends to round numbers so the axis labels read cleanly.
+  lo = Math.floor((lo - pad) / snap + 1e-9) * snap;
+  hi = Math.ceil((hi + pad) / snap - 1e-9) * snap;
   return { lo, hi, at: (v: number) => (v - lo) / (hi - lo) };
 }
 
@@ -64,6 +61,22 @@ export default function CoffeeCharts({ method, shots, current }: Props) {
   const [tab, setTab] = useState<Tab>('map');
   const target = TARGET[method];
 
+  // Draw at the real pixel size, so text and dots keep one size on every screen.
+  const box = useRef<HTMLDivElement>(null);
+  const [W, setW] = useState(340);
+  useEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    const measure = () => setW(Math.max(260, Math.round(el.clientWidth)));
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const H = Math.round(Math.max(230, Math.min(400, W * 0.6)));
+  const PW = W - PAD.l - PAD.r;
+  const PH = H - PAD.t - PAD.b;
+
   const mapPts = shots.filter((s) => s.grind !== null && s.time_s !== null) as (Shot & { grind: number; time_s: number })[];
   const ratioPts = shots
     .filter((s) => s.time_s !== null && s.dose && s.yield_g !== null)
@@ -78,8 +91,8 @@ export default function CoffeeCharts({ method, shots, current }: Props) {
   let legend: [string, string][] = [];
 
   if (tab === 'map') {
-    const sx = scale([...mapPts.map((p) => p.grind), current.grind], 0.6, 0.1);
-    const sy = scale([...mapPts.map((p) => p.time_s), current.time_s, ...target.time], 10, method === 'pourover' ? 15 : 3);
+    const sx = scale([...mapPts.map((p) => p.grind), current.grind], 0.6, 0.1, 0.1);
+    const sy = scale([...mapPts.map((p) => p.time_s), current.time_s, ...target.time], 10, method === 'pourover' ? 15 : 3, method === 'pourover' ? 15 : 1);
     caption = '横轴为研磨度（左细右粗），纵轴为萃取时间，白色圆环为当前参数';
     legend = [
       ['#5C4D4B', '评分 1–4'],
@@ -89,19 +102,19 @@ export default function CoffeeCharts({ method, shots, current }: Props) {
     body = (
       <>
         <rect x={PAD.l} y={y(sy.at(target.time[1]))} width={PW} height={y(sy.at(target.time[0])) - y(sy.at(target.time[1]))} fill="rgba(255,138,101,.15)" stroke="#8A5C50" strokeDasharray="4 3" />
-        <text x={W - PAD.r - 4} y={y(sy.at(target.time[1])) + 12} textAnchor="end" fontSize="10" fill="#F0B8A6">
+        <text x={W - PAD.r - 4} y={y(sy.at(target.time[1])) + 12} textAnchor="end" fontSize="11" fill="#F0B8A6">
           目标区间 {secs(target.time[0], method)}–{secs(target.time[1], method)}
         </text>
-        <text x={PAD.l - 6} y={PAD.t + 9} textAnchor="end" fontSize="10" fill="#D2CADC">
+        <text x={PAD.l - 6} y={PAD.t + 9} textAnchor="end" fontSize="11" fill="#D2CADC">
           {secs(sy.hi, method)}
         </text>
-        <text x={PAD.l - 6} y={H - PAD.b} textAnchor="end" fontSize="10" fill="#D2CADC">
+        <text x={PAD.l - 6} y={H - PAD.b} textAnchor="end" fontSize="11" fill="#D2CADC">
           {secs(sy.lo, method)}
         </text>
-        <text x={PAD.l} y={H - 10} fontSize="10" fill="#D2CADC">
+        <text x={PAD.l} y={H - 10} fontSize="11" fill="#D2CADC">
           细 {fmt(sx.lo)}
         </text>
-        <text x={W - PAD.r} y={H - 10} textAnchor="end" fontSize="10" fill="#D2CADC">
+        <text x={W - PAD.r} y={H - 10} textAnchor="end" fontSize="11" fill="#D2CADC">
           {fmt(sx.hi)} 粗
         </text>
         {mapPts.map((p) => (
@@ -116,8 +129,8 @@ export default function CoffeeCharts({ method, shots, current }: Props) {
       </>
     );
   } else if (tab === 'ratio') {
-    const sx = scale([...ratioPts.map((p) => p.time), current.time_s, ...target.time], 10, method === 'pourover' ? 15 : 3);
-    const sy = scale([...ratioPts.map((p) => p.ratio), current.ratio, ...target.ratio], method === 'pourover' ? 4 : 1, method === 'pourover' ? 1 : 0.2);
+    const sx = scale([...ratioPts.map((p) => p.time), current.time_s, ...target.time], 10, method === 'pourover' ? 15 : 3, method === 'pourover' ? 15 : 1);
+    const sy = scale([...ratioPts.map((p) => p.ratio), current.ratio, ...target.ratio], method === 'pourover' ? 4 : 1, method === 'pourover' ? 1 : 0.2, method === 'pourover' ? 1 : 0.1);
     caption = '横轴为萃取时间，纵轴为粉液比，虚线框为目标区间，白色圆环为当前参数';
     legend = [
       ['#F6F3FA', '偏酸'],
@@ -135,16 +148,16 @@ export default function CoffeeCharts({ method, shots, current }: Props) {
           stroke="#8A5C50"
           strokeDasharray="4 3"
         />
-        <text x={PAD.l - 6} y={PAD.t + 9} textAnchor="end" fontSize="10" fill="#D2CADC">
+        <text x={PAD.l - 6} y={PAD.t + 9} textAnchor="end" fontSize="11" fill="#D2CADC">
           1:{fmt(sy.hi)}
         </text>
-        <text x={PAD.l - 6} y={H - PAD.b} textAnchor="end" fontSize="10" fill="#D2CADC">
+        <text x={PAD.l - 6} y={H - PAD.b} textAnchor="end" fontSize="11" fill="#D2CADC">
           1:{fmt(sy.lo)}
         </text>
-        <text x={PAD.l} y={H - 10} fontSize="10" fill="#D2CADC">
+        <text x={PAD.l} y={H - 10} fontSize="11" fill="#D2CADC">
           {secs(sx.lo, method)}
         </text>
-        <text x={W - PAD.r} y={H - 10} textAnchor="end" fontSize="10" fill="#D2CADC">
+        <text x={W - PAD.r} y={H - 10} textAnchor="end" fontSize="11" fill="#D2CADC">
           {secs(sx.hi, method)}
         </text>
         {ratioPts.map((p) => (
@@ -167,7 +180,7 @@ export default function CoffeeCharts({ method, shots, current }: Props) {
         {[1, 5, 10].map((s) => (
           <g key={s}>
             <line x1={PAD.l} x2={W - PAD.r} y1={py(s)} y2={py(s)} stroke="rgba(255,255,255,.1)" />
-            <text x={PAD.l - 6} y={py(s) + 3} textAnchor="end" fontSize="10" fill="#D2CADC">
+            <text x={PAD.l - 6} y={py(s) + 3} textAnchor="end" fontSize="11" fill="#D2CADC">
               {s}
             </text>
           </g>
@@ -209,17 +222,14 @@ export default function CoffeeCharts({ method, shots, current }: Props) {
 
       <div className="mt-3 flex min-h-5 justify-end">{legend.length > 0 && <Legend items={legend} />}</div>
 
-      <svg viewBox={`0 0 ${W} ${H}`} className="mt-1 block w-full" role="img" aria-label={TABS.find((t) => t.id === tab)?.label}>
+      <div ref={box} className="mt-1">
+      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} className="block" role="img" aria-label={TABS.find((t) => t.id === tab)?.label}>
         <line x1={PAD.l} y1={PAD.t} x2={PAD.l} y2={H - PAD.b} stroke="rgba(255,255,255,.22)" />
         <line x1={PAD.l} y1={H - PAD.b} x2={W - PAD.r} y2={H - PAD.b} stroke="rgba(255,255,255,.22)" />
         {body}
-        {empty && (
-          <text x={PAD.l + PW / 2} y={PAD.t + PH / 2 - 16} textAnchor="middle" fontSize="12" fill="#D2CADC">
-            暂无数据，保存记录后在此显示
-          </text>
-        )}
       </svg>
-      <p className="mt-1 text-center text-xs text-sub">{caption}</p>
+      </div>
+      <p className="mt-1 text-center text-xs leading-relaxed text-sub">{empty ? '暂无数据，保存记录后在此显示。' : caption}</p>
     </section>
   );
 }
