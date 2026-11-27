@@ -222,7 +222,7 @@ export default function CoffeeCharts({ method, shots, current }: Props) {
 
       <div className="mt-3 flex min-h-5 justify-end">{legend.length > 0 && <Legend items={legend} />}</div>
 
-      <div ref={box} className="mt-1">
+      <div ref={box} className="mt-1 overflow-hidden">
       <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} className="block" role="img" aria-label={TABS.find((t) => t.id === tab)?.label}>
         <line x1={PAD.l} y1={PAD.t} x2={PAD.l} y2={H - PAD.b} stroke="rgba(255,255,255,.22)" />
         <line x1={PAD.l} y1={H - PAD.b} x2={W - PAD.r} y2={H - PAD.b} stroke="rgba(255,255,255,.22)" />

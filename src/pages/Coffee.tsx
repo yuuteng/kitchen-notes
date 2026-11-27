@@ -331,7 +331,7 @@ export default function Coffee() {
           )}
 
           <div className="grid grid-cols-2 gap-2">
-            <div className="flex flex-col gap-1.5">
+            <div className="flex min-w-0 flex-col gap-1.5">
               <label htmlFor="bean" className="text-xs font-semibold text-sub">
                 咖啡豆
               </label>
@@ -342,11 +342,11 @@ export default function Coffee() {
                 ))}
               </datalist>
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex min-w-0 flex-col gap-1.5">
               <label htmlFor="roast" className="text-xs font-semibold text-sub">
                 烘焙日期
               </label>
-              <input id="roast" type="date" className="field [color-scheme:dark]" value={roast} onChange={(e) => setRoast(e.target.value)} />
+              <input id="roast" type="date" className="field min-h-[50px] appearance-none text-left [color-scheme:dark]" value={roast} onChange={(e) => setRoast(e.target.value)} />
             </div>
           </div>
 
