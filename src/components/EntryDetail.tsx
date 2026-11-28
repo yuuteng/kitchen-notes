@@ -57,6 +57,13 @@ export default function EntryDetail({ entry, variant, onEdit, onDelete, onClose 
         </p>
       )}
       <div className="flex gap-2.5">
+        {page && onClose && (
+          <button aria-label="返回" onClick={onClose} className="btn-ghost flex h-14 w-14 shrink-0 items-center justify-center">
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-[22px] w-[22px] fill-none stroke-current [stroke-linecap:round] [stroke-linejoin:round] [stroke-width:2.4]">
+              <path d="M15 5l-7 7 7 7" />
+            </svg>
+          </button>
+        )}
         <button onClick={remove} disabled={busy} className="btn-ghost h-14 flex-1 text-base">
           {busy ? '删除中…' : confirming ? '确认删除' : '删除'}
         </button>
@@ -84,7 +91,7 @@ export default function EntryDetail({ entry, variant, onEdit, onDelete, onClose 
         />
       )}
 
-      <div className={page ? `relative flex flex-col gap-6 px-5 ${entry.photo ? '-mt-9 rounded-t-[34px] border-t border-white/20 bg-[#100d16] pt-7' : 'pt-20'}` : 'flex flex-col gap-5 pt-5'}>
+      <div className={page ? `relative flex flex-col gap-6 px-5 ${entry.photo ? '-mt-9 rounded-t-[34px] border-t border-white/20 bg-[#100d16] pt-7' : 'pt-10'}` : 'flex flex-col gap-5 pt-5'}>
         <motion.div {...stagger(0)} key={`h${entry.id}`}>
           <h2 className={`font-extrabold ${page ? 'text-[32px]' : 'text-[28px]'}`}>{entry.name}</h2>
           <div className="mt-1.5 text-sm text-sub">
@@ -144,13 +151,6 @@ export default function EntryDetail({ entry, variant, onEdit, onDelete, onClose 
 
       {page && <div className="shrink-0 border-t border-white/10 bg-bg px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">{actions}</div>}
 
-      {page && onClose && (
-        <button aria-label="返回" onClick={onClose} className="absolute left-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/60">
-          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-[22px] w-[22px] fill-none stroke-current [stroke-linecap:round] [stroke-linejoin:round] [stroke-width:2.4]">
-            <path d="M15 5l-7 7 7 7" />
-          </svg>
-        </button>
-      )}
     </div>
   );
 }
