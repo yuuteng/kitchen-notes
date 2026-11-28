@@ -12,10 +12,12 @@ interface Props {
   onClose?: () => void;
 }
 
+// Opacity and position only: animating a blur filter stalls phone browsers.
+// The delay is capped so a long recipe does not trickle in.
 const stagger = (i: number) => ({
-  initial: { opacity: 0, y: 20, filter: 'blur(10px)' },
-  animate: { opacity: 1, y: 0, filter: 'blur(0px)' },
-  transition: { duration: 0.5, ease: EASE, delay: 0.08 + i * 0.04 },
+  initial: { opacity: 0, y: 14 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.35, ease: EASE, delay: Math.min(0.04 + i * 0.025, 0.3) },
 });
 
 export default function EntryDetail({ entry, variant, onEdit, onDelete, onClose }: Props) {
@@ -47,8 +49,29 @@ export default function EntryDetail({ entry, variant, onEdit, onDelete, onClose 
     }
   };
 
+  const actions = (
+    <div className="flex flex-col gap-2">
+      {error && (
+        <p role="alert" className="text-sm text-accent">
+          {error}
+        </p>
+      )}
+      <div className="flex gap-2.5">
+        <button onClick={remove} disabled={busy} className="btn-ghost h-14 flex-1 text-base">
+          {busy ? '删除中…' : confirming ? '确认删除' : '删除'}
+        </button>
+        <button onClick={onEdit} className="btn-accent h-14 flex-1 text-base">
+          编辑
+        </button>
+      </div>
+    </div>
+  );
+
+  // On the phone the content scrolls inside its own area and the actions sit in a docked bar below it.
+  // Nothing is position:fixed here: the page slides in with a transform, which breaks fixed children.
   return (
-    <div className={page ? 'min-h-full bg-bg pb-32' : ''}>
+    <div className={page ? 'relative flex min-h-0 flex-1 flex-col' : ''}>
+      <div className={page ? 'min-h-0 flex-1 overflow-y-auto overscroll-contain pb-8' : ''}>
       {entry.photo && (
         <motion.img
           key={entry.photo}
@@ -61,7 +84,7 @@ export default function EntryDetail({ entry, variant, onEdit, onDelete, onClose 
         />
       )}
 
-      <div className={page ? `relative flex flex-col gap-6 px-5 pt-7 ${entry.photo ? '-mt-9 rounded-t-[34px] border-t border-white/20 bg-[rgba(16,13,22,.92)] backdrop-blur-2xl' : 'pt-24'}` : 'flex flex-col gap-5 pt-5'}>
+      <div className={page ? `relative flex flex-col gap-6 px-5 ${entry.photo ? '-mt-9 rounded-t-[34px] border-t border-white/20 bg-[#100d16] pt-7' : 'pt-20'}` : 'flex flex-col gap-5 pt-5'}>
         <motion.div {...stagger(0)} key={`h${entry.id}`}>
           <h2 className={`font-extrabold ${page ? 'text-[32px]' : 'text-[28px]'}`}>{entry.name}</h2>
           <div className="mt-1.5 text-sm text-sub">
@@ -115,24 +138,14 @@ export default function EntryDetail({ entry, variant, onEdit, onDelete, onClose 
           </section>
         )}
 
-        {error && (
-          <p role="alert" className="text-sm text-accent">
-            {error}
-          </p>
-        )}
-
-        <div className={page ? 'fixed inset-x-4 bottom-6 z-10 flex gap-2.5' : 'flex gap-2.5'}>
-          <button onClick={remove} disabled={busy} className="btn-ghost h-14 flex-1 text-base backdrop-blur-xl">
-            {busy ? '删除中…' : confirming ? '确认删除' : '删除'}
-          </button>
-          <button onClick={onEdit} className="btn-accent h-14 flex-1 text-base">
-            编辑
-          </button>
-        </div>
+        {!page && actions}
+      </div>
       </div>
 
+      {page && <div className="shrink-0 border-t border-white/10 bg-bg px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">{actions}</div>}
+
       {page && onClose && (
-        <button aria-label="返回" onClick={onClose} className="fixed left-4 top-10 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/40 backdrop-blur-xl">
+        <button aria-label="返回" onClick={onClose} className="absolute left-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/60">
           <svg aria-hidden="true" viewBox="0 0 24 24" className="h-[22px] w-[22px] fill-none stroke-current [stroke-linecap:round] [stroke-linejoin:round] [stroke-width:2.4]">
             <path d="M15 5l-7 7 7 7" />
           </svg>

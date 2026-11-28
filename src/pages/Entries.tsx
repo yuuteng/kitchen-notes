@@ -168,7 +168,7 @@ export default function Entries({ kind }: { kind: Kind }) {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ duration: 0.55, ease: EASE }}
-            className="fixed inset-0 z-40 overflow-y-auto bg-bg"
+            className="fixed inset-0 z-40 flex flex-col bg-bg"
           >
             <EntryDetail entry={selected} variant="page" onEdit={() => setEditing(selected)} onDelete={() => remove(selected)} onClose={() => setSelId(null)} />
           </motion.div>
